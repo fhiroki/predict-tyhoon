@@ -26,7 +26,6 @@ lm_anomaly = lm(ANOMALY ~ YEAR, npac)
 summary(lm_anomaly)
 plot(npac$YEAR, npac$ANOMALY)
 abline(lm_anomaly)
-# nls(ANOMALY ~ a/(1+b*exp(c*YEAR)), npac, start=c(a=1,b=1,c=-1))
 
 landing.test = data.frame(
     'YEAR' = 2019,
@@ -37,11 +36,11 @@ landing.test = data.frame(
 )
 
 # modeling
-lm2 = lm(COUNT ~ .^2, landing.train)
+lm2 = lm(COUNT ~ .^3, landing.train)
 lm2 = step(lm2)
 summary(lm2)
 
-glm2 = glm(COUNT ~ .^2, landing.train, family = poisson(link = 'log'))
+glm2 = glm(COUNT ~ .^3, landing.train, family = poisson(link = 'log'))
 glm2 = step(glm2)
 summary(glm2)
 
