@@ -1,5 +1,4 @@
 library(dplyr)
-setwd('/Users/hiroki/Develop/School/predict-typhoon/data/')
 
 landing_all = read.csv('landing.csv', fileEncoding = 'Shift_JIS', header = T)
 landing_all[is.na(landing_all)] <- 0
