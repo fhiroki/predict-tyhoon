@@ -8,7 +8,7 @@ import time
 
 
 def download_img(url, file_name):
-    print('download:', url)
+    print('downloading:', url)
     r = requests.get(url, stream=True)
     if r.status_code == 200:
         with open(file_name, 'wb') as f:
@@ -16,17 +16,25 @@ def download_img(url, file_name):
 
 
 def main():
+    is_anom = True
     year = 1982
     end_year = 2019
     months = ['06', '07', '08', '09', '10']
-    url_template = \
-        'https://www.data.jma.go.jp/gmd/kaiyou/data/db/kaikyo/monthly/image/HT/{year}/sstM_HT{year}{month}.png'
+    img_dir = '../images'
+    url_template = 'https://www.data.jma.go.jp/gmd/kaiyou/data/db/kaikyo/monthly/image/HT/{year}'
+
+    if is_anom:
+        url_template = os.path.join(url_template, 'sstM_anom_HT{year}{month}.png')
+        img_dir = os.path.join(img_dir, 'anom')
+        os.makedirs(img_dir, exist_ok=True)
+    else:
+        url_template = os.path.join(url_template, 'sstM_HT{year}{month}.png')
 
     while year <= end_year:
         for month in months:
             filename = '{}_{}.png'.format(year, month)
             download_img(url_template.format(year=year, month=month),
-                         os.path.join('../image', filename))
+                         os.path.join(img_dir, filename))
             time.sleep(0.1)
         year += 1
 

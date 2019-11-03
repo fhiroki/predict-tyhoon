@@ -14,7 +14,7 @@ from PIL import Image
 
 IMG_H, IMG_W = 200, 200
 MODEL_PATH = '../models'
-IMG_PATH = '../images/'
+IMG_PATH = '../images'
 
 
 def plot_result(history, model_path):
@@ -53,8 +53,8 @@ def build_model(n_classes):
     model.add(layers.Dropout(0.5))
     model.add(layers.Dense(512, activation="relu"))
     model.add(layers.Dense(n_classes, activation="sigmoid"))
-    model.compile(loss="binary_crossentropy",
-                  optimizer=optimizers.RMSprop(lr=1e-4),
+    model.compile(loss="categorical_crossentropy",
+                  optimizer=optimizers.RMSprop(lr=1e-3),
                   metrics=["acc"])
 
     # モデル構成の確認
@@ -88,19 +88,24 @@ def convert_img(filename):
 def make_sample(files, land_df):
     X, y = [], []
     for filename in files:
+        if filename == 'anom':
+            continue
         year = filename.split('_')[0]
         month = filename.split('_')[1][:2]
         if year != '2019':
             X.append(convert_img(filename))
+            # X.append(convert_img(os.path.join('anom', filename)))
             monthly_count = land_df[land_df['year'] == int(year)]['m{}'.format(month)].values[0]
             y.append(monthly_count)
+            # y.append(monthly_count)
     return np.array(X), np.array(y)
 
 
 def make_sample_2019():
     X_2019 = []
-    for filename in ['2019_{}.png'.format(month) for month in ['06', '07', '08', '09']]:
+    for filename in ['2019_{}.png'.format(month) for month in ['06', '07', '08', '09', '10']]:
         X_2019.append(convert_img(filename))
+        # X_2019.append(convert_img(os.path.join('anom', filename)))
     return np.array(X_2019)
 
 
@@ -109,9 +114,10 @@ def main():
     land_df, n_classes = read_landing_data()
     random.shuffle(all_files)
 
-    th = math.floor(len(all_files) * 0.8)
+    th = math.floor(len(all_files) * 0.5)
     train = all_files[0:th]
     test = all_files[th:]
+
     X_train, y_train = make_sample(train, land_df)
     X_test, y_test = make_sample(test, land_df)
     X_2019 = make_sample_2019()
@@ -125,11 +131,14 @@ def main():
     y_test = np_utils.to_categorical(y_test, n_classes)
 
     model = build_model(n_classes)
-    history = model.fit(X_train, y_train, epochs=20, batch_size=6, validation_data=(X_test, y_test))
+    history = model.fit(X_train, y_train, epochs=10, batch_size=6, validation_data=(X_test, y_test))
+
+    print('train accuracy:', model.evaluate(X_train, y_train)[1])
+    print('test accuracy:', model.evaluate(X_test, y_test)[1])
 
     pred = model.predict(X_2019)
-    print(pred)
-    print('predicted 2019 typhoon counts: ', np.argmax(pred, axis=1).sum())
+    print('predicted 6, 7, 8, 9, 10 months probability', pred)
+    print('predicted 2019 typhoon counts:', np.argmax(pred, axis=1).sum())
 
     model_path = os.path.join(MODEL_PATH, '{0:%Y%m%d}_{0:%H%M}'.format(datetime.now()))
     os.makedirs(model_path)
