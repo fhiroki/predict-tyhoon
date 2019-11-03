@@ -35,16 +35,16 @@ landing.test = data.frame(
 )
 
 # modeling
-lm2 = lm(COUNT ~ .^3, landing.train)
-lm2 = step(lm2)
-summary(lm2)
+lm = lm(COUNT ~ .^3, landing.train)
+lm = step(lm)
+summary(lm)
 
-glm2 = glm(COUNT ~ .^3, landing.train, family = poisson(link = 'log'))
-glm2 = step(glm2)
-summary(glm2)
+glm = glm(COUNT ~ .^3, landing.train, family = poisson(link = 'log'))
+glm = step(glm)
+summary(glm)
 
-predict(lm2, landing.test)
-exp(predict(glm2, landing.test))
+predict(lm, landing.test)
+exp(predict(glm, landing.test))
 
 
 # read other data
@@ -72,13 +72,13 @@ landing.train <- na.omit(landing.train)
 plot(landing.train)
 
 # modeling
-lm1 = lm(COUNT ~ ., landing.train)
-summary(lm1)
+lm2 = lm(COUNT ~ ., landing.train)
+summary(lm2)
 
-glm1 = glm(COUNT ~ ., landing.train, family = poisson)
-summary(glm1)
+glm2 = glm(COUNT ~ ., landing.train, family = poisson)
+summary(glm2)
 
 # predict
-predict(lm1, landing.test)
-exp(predict(glm1, landing.test))
+predict(lm2, landing.test)
+exp(predict(glm2, landing.test))
 
